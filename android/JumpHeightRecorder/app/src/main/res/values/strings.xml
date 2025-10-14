@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">JumpHeightRecorder</string>
+    <string name="instructions">1. 输入人物真实身高并保持镜头垂直对准。
+2. 点击“估算”会基于身高给出参考比例。
+3. 点击“开始录制”即可记录跳跃视频，录制结束后会输出基于视频帧估算的离地高度。</string>
+    <string name="person_height_cm">人物身高 (cm)</string>
+    <string name="estimate">估算</string>
+    <string name="start_recording">开始录制</string>
+    <string name="stop_recording">结束录制</string>
+    <string name="estimation_placeholder">请先输入人物身高并点击估算。</string>
+    <string name="invalid_height">请输入正确的身高（例如 175）。</string>
+    <string name="permission_denied">需要相机和麦克风权限才能继续。</string>
+    <string name="camera_initialization_failed">相机初始化失败，请检查设备权限。</string>
+    <string name="video_saved">视频已保存：%1$s</string>
+    <string name="video_save_failed">视频保存失败，请重试。</string>
+    <string name="estimated_ratio_template">参考比例：每厘米约 %1$.2f 个像素</string>
+</resources>
