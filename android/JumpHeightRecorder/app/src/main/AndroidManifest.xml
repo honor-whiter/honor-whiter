@@ -14,6 +14,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.JumpHeightRecorder">
         <activity
+            android:name=".WorkoutCounterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.JumpHeightRecorder" />
+        <activity
+            android:name=".JumpHeightActivity"
+            android:exported="false"
+            android:theme="@style/Theme.JumpHeightRecorder" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.JumpHeightRecorder">

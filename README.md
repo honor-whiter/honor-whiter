@@ -1,6 +1,6 @@
 # 👋 欢迎来到 Jump Height Recorder 学习仓库
 
-本仓库包含一个用于练习 Android CameraX 视频录制与垂直起跳高度估算的入门示例。完整项目位于 [`android/JumpHeightRecorder`](android/JumpHeightRecorder/README.md)。
+本仓库包含一个用于练习 Android CameraX、ML Kit 姿态识别与垂直起跳高度估算的入门示例。完整项目位于 [`android/JumpHeightRecorder`](android/JumpHeightRecorder/README.md)。
 
 ## 如何在本地使用 Android Studio 打开项目
 
@@ -28,6 +28,7 @@
    - 通过 USB 连接一台已开启开发者模式的 Android 手机并授权调试，或在 **Device Manager** 中创建 API 34（Android 14）以上的模拟器。
 5. **运行应用**
    - 在工具栏选择目标设备后点击绿色的 ▶️ Run 按钮。
-   - 首次运行会弹出相机与麦克风权限，允许后即可看到预览、录制以及示例估算界面。
+   - 首次运行会弹出相机与麦克风权限，允许后即可看到主界面，可根据需要进入“跳高测试”或“运动计数”。
+   - 跳高测试模块沿用 CameraX + 示例估算逻辑；运动计数模块会额外下载 Google ML Kit 姿态识别模型（需能够访问 `https://maven.google.com/` 与 Google Play 服务依赖），并实时统计引体向上、俯卧撑、自重深蹲的次数。
 
 更多关于功能、代码结构和进阶练习的说明，请继续查阅 [Android 项目内的学习指南](android/JumpHeightRecorder/README.md)。

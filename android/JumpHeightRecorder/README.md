@@ -1,7 +1,7 @@
 # JumpHeightRecorder 学习指南
 
-> 这是一个用于熟悉本平台工作流并入门 Android CameraX 视频录制的示例项目。
-> 代码和文档都以“通过已知身高估算垂直起跳离地高度”为主题。所有估算算法仅为演示用途，真实项目需要更精准的传感器或骨骼识别方案。
+> 这是一个用于熟悉本平台工作流并入门 Android CameraX 与 ML Kit 姿态识别的示例项目。
+> 当前包含两个主要功能模块：跳高测试（录制视频并基于示例算法估算离地高度）与运动计数（实时识别引体向上、俯卧撑、自重深蹲）。所有估算/识别逻辑仅为演示用途，真实项目需要更精准的模型与传感器方案。
 
 ## 1. 认识仓库结构
 
@@ -14,6 +14,13 @@ android/JumpHeightRecorder/   # Android Studio 可直接导入的项目根目录
   ├─ build.gradle.kts         # 工程级构建脚本
   └─ settings.gradle.kts      # 包含的模块配置
 ```
+
+主要 Kotlin 入口位于 `app/src/main/java/com/example/jumprecorder/`：
+
+- `MainActivity`：功能选择页，跳转到跳高测试或运动计数界面。
+- `JumpHeightActivity`：沿用 CameraX 录制 + 示例离地高度估算流程。
+- `WorkoutCounterActivity`：结合 CameraX 预览、视频录制与 ML Kit 姿态识别进行动作分类计数。
+- `WorkoutCounter` / `WorkoutPoseAnalyzer` / `WorkoutSessionViewModel`：封装动作识别、计数状态机以及 UI 状态同步逻辑，便于后续替换为更复杂的模型。
 
 建议在 Codespaces、Dev Container 或本地环境中逐步体验以下流程：
 
@@ -46,26 +53,31 @@ android/JumpHeightRecorder/   # Android Studio 可直接导入的项目根目录
 4. **授予必要权限**：首次运行时系统会弹出相机与麦克风权限弹窗，点击允许。
 5. **查看 logcat**：如果应用没有显示画面，可打开 Logcat 检查 CameraX 初始化日志。
 
-## 4. 录制与估算流程
+## 4. 应用内主要流程
 
-在应用内：
+1. **选择模块**：主界面提供“跳高测试”和“运动计数”两个入口，可根据训练目标自由切换。
+2. **跳高测试**：
    - 输入人物真实身高（厘米）。
    - 点击“估算”得到像素换算参考值。
    - 点击“开始录制”触发 CameraX 视频录制；再次点击停止。
    - 停止录制后，`JumpAnalyzer` 会读取视频做示例性估算，并在界面上显示结果。
+3. **运动计数**：
+   - 点击“开始记录”后会同时启动视频录制与 ML Kit 姿态识别，请确保全身位于取景框中。
+   - 系统会尝试自动识别当前动作类型（引体向上、俯卧撑、自重深蹲），并根据“起始点 → 动作中段 → 回到起始点”的节奏累计次数。
+   - 停止录制后，会生成带次数汇总的统计文本，可直接通过分享按钮发送至 DeepSeek 等云端分析服务。
 
 ## 5. 关键代码导读
 
-- [`MainActivity`](app/src/main/java/com/example/jumprecorder/MainActivity.kt)：
-  - 使用 **ViewBinding** 和 **CameraX** 完成相机预览、权限申请和视频录制。
-  - 录制结束后调用 `JumpMeasurementViewModel.onVideoReady()`。
-- [`JumpMeasurementViewModel`](app/src/main/java/com/example/jumprecorder/JumpMeasurementViewModel.kt)：
-  - 保留人物身高与像素换算参数。
-  - 在后台线程调用 `JumpAnalyzer` 并将结果推送到界面。
-- [`JumpAnalyzer`](app/src/main/java/com/example/jumprecorder/JumpAnalyzer.kt)：
-  - 使用 `MediaMetadataRetriever` 抽取若干视频帧，查找最亮的像素行作为脚尖高度示例。
-  - 将像素高度除以换算比例得到估算值。
-  - 提醒用户替换为真正的骨骼检测算法（如 MediaPipe Pose、OpenCV + AprilTag 标定等）。
+- [`MainActivity`](app/src/main/java/com/example/jumprecorder/MainActivity.kt)：功能选择页，负责跳转到具体模块。
+- 跳高测试链路：
+  - [`JumpHeightActivity`](app/src/main/java/com/example/jumprecorder/JumpHeightActivity.kt)：使用 **ViewBinding** 和 **CameraX** 完成相机预览、权限申请和视频录制，录制结束后调用 `JumpMeasurementViewModel.onVideoReady()`。
+  - [`JumpMeasurementViewModel`](app/src/main/java/com/example/jumprecorder/JumpMeasurementViewModel.kt)：保留人物身高与像素换算参数，在后台线程调用 `JumpAnalyzer` 并将结果推送到界面。
+  - [`JumpAnalyzer`](app/src/main/java/com/example/jumprecorder/JumpAnalyzer.kt)：使用 `MediaMetadataRetriever` 抽取若干视频帧，查找最亮的像素行作为脚尖高度示例；将像素高度除以换算比例得到估算值。
+- 运动计数链路：
+  - [`WorkoutCounterActivity`](app/src/main/java/com/example/jumprecorder/WorkoutCounterActivity.kt)：绑定 CameraX 预览、视频录制与 `ImageAnalysis`，同时启动姿态识别与会话状态管理。
+  - [`WorkoutPoseAnalyzer`](app/src/main/java/com/example/jumprecorder/WorkoutPoseAnalyzer.kt)：基于 ML Kit Accurate Pose Detector 解析人体关键点并回调 `WorkoutCounter`。
+  - [`WorkoutCounter`](app/src/main/java/com/example/jumprecorder/WorkoutCounter.kt)：实现动作分类与节奏状态机，根据关节角度/高度变化计算引体向上、俯卧撑、自重深蹲的完成次数。
+  - [`WorkoutSessionViewModel`](app/src/main/java/com/example/jumprecorder/WorkoutSessionViewModel.kt)：维护实时计数、当前动作类型、统计摘要以及分享状态，驱动界面展示。
 
 ## 6. 下一步练习建议
 
@@ -74,6 +86,7 @@ android/JumpHeightRecorder/   # Android Studio 可直接导入的项目根目录
 | 熟悉平台协作流程 | 新建分支，修改 UI 文案或主题颜色，跑通 `./gradlew lint`，提交 PR。 |
 | 优化跳跃识别 | 集成 MediaPipe Pose，并在 `JumpAnalyzer` 内根据脚踝关键点的纵向位移计算。 |
 | 数据可视化 | 将视频帧中提取到的位移曲线绘制到 `PreviewView` 的叠加层。 |
+| 扩展运动计数 | 训练或接入自定义动作分类模型，利用 `WorkoutCounter` 保持计数状态机，增补其他动作（例如波比跳、箭步蹲）。 |
 | 科学校准 | 编写标定流程：通过测量相机到地面的距离、镜头 FOV 等参数修正 `pixelPerCentimeter`。 |
 
 ## 7. 常见问题 FAQ
@@ -81,5 +94,6 @@ android/JumpHeightRecorder/   # Android Studio 可直接导入的项目根目录
 - **为什么估算结果不准确？** 当前算法仅用于教学展示。需要结合人体关键点检测或外部传感器才能得到可靠数据。
 - **如何导出视频文件？** 录制文件默认保存在应用的外部媒体目录（`/Android/media/com.example.jumprecorder/`），可通过文件管理器或 `adb pull` 导出。
 - **如果没有真实设备怎么办？** 可以使用支持 CameraX 的 Android 模拟器（API 30 及以上）。不过模拟器的传感器数据有限，建议尽快在真机上调试。
+- **运动计数为什么刚开始识别缓慢？** 首次进入该模块时，Google ML Kit 会在后台下载姿态识别模型，需要保持网络畅通（能够访问 `https://maven.google.com/` 及 Google Play 服务依赖）。下载完成后即可离线推理。
 
 祝学习顺利！
