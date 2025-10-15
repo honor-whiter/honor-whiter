@@ -19,7 +19,7 @@ android/JumpHeightRecorder/   # Android Studio 可直接导入的项目根目录
 
 1. `git clone` 仓库：这里指下载保存本示例的 Git 仓库。若你在 GitHub 上看到的是 `https://github.com/<你的用户名>/honor-whiter`，可以在终端运行 `git clone https://github.com/<你的用户名>/honor-whiter.git`，或直接点击网页上的 **Code ▾ → Download ZIP**。
 2. 在 Android Studio 欢迎页选择 **Open**，定位到 `android/JumpHeightRecorder` 文件夹并导入（不用新建项目）。
-3. 同步 Gradle 并根据提示安装缺失的 SDK / Build Tools。若同步时出现 `Plugin [id: 'com.android.application'] was not found` 错误，请确认已拉取最新的 `settings.gradle.kts`（其中包含 `google()` 与 `mavenCentral()` 仓库配置），并确保网络可以访问 Google Maven 仓库后重新点击 **Sync Project with Gradle Files**。
+3. 同步 Gradle 并根据提示安装缺失的 SDK / Build Tools。若同步时出现 `Plugin [id: 'com.android.application'] was not found` 错误，请确认已拉取最新的 `settings.gradle.kts`。文件中已加入 `resolutionStrategy`，会把 `com.android.application`、`com.android.library` 等插件映射到 Google Maven 的 `com.android.tools.build:gradle` 组件；若依旧提示未找到，通常是由于网络无法访问 `https://maven.google.com/`，可在联网后重新点击 **Sync Project with Gradle Files**。
 4. `git status` 查看当前分支状态。
 5. `git diff` 理解变更内容。
 6. 通过 PR 模板提交改动。

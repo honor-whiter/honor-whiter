@@ -18,7 +18,7 @@
    - 定位到刚才克隆的仓库根目录，选择其中的 `android/JumpHeightRecorder` 文件夹并确认。
 3. **等待同步与依赖下载**
    - 第一次打开会自动执行 Gradle 同步，过程中会提示安装缺失的 SDK 组件，按照向导完成即可。
-   - 如果提示“Plugin [id: 'com.android.application'…] was not found”，请确认已经同步最新的仓库代码（`settings.gradle.kts` 中已经包含 `google()` 与 `mavenCentral()` 仓库配置），并确保电脑可以访问 Google Maven。再次点击 **Sync Project with Gradle Files** 即可。
+   - 如果提示“Plugin [id: 'com.android.application'…] was not found”，请确认已经同步最新的仓库代码。`settings.gradle.kts` 现已包含对 `com.android.application`、`com.android.library` 等插件的显式解析策略，会直接从 Google Maven 下载对应的 Android Gradle Plugin；若仍报错，多半是因为当前网络无法访问 `https://maven.google.com/`，可切换代理或 VPN 后再点击 **Sync Project with Gradle Files**。
    - 如果提示“Gradle wrapper not found”，可在 IDE 下方的 Terminal 中运行：
      ```bash
      gradle wrapper --gradle-version 8.2
