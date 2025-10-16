@@ -32,3 +32,25 @@
    - 跳高测试模块沿用 CameraX + 示例估算逻辑；运动计数模块会额外下载 Google ML Kit 姿态识别模型（需能够访问 `https://maven.google.com/` 与 Google Play 服务依赖），并实时统计引体向上、俯卧撑、自重深蹲的次数。
 
 更多关于功能、代码结构和进阶练习的说明，请继续查阅 [Android 项目内的学习指南](android/JumpHeightRecorder/README.md)。
+
+## 动作识别模型训练脚本
+
+仓库根目录新增了一个 `ml/` 文件夹，提供可本地运行的 Python 脚本，帮助你训练/替换运动计数模块所使用的姿态分类模型：
+
+- `ml/extract_pose_features.py`：将通过 ML Kit 采集到的关键点序列（JSON）转换为关节角度、相对高度等特征 CSV。
+- `ml/train_pose_classifier.py`：读取特征 CSV，计算每个动作类别的均值向量并导出到 `android/JumpHeightRecorder/app/src/main/assets/workout_classifier.json`。
+- `ml/data/sample_pose_dataset.csv`：提供 3 类基础动作（俯卧撑、自重深蹲、引体向上）的示例特征，可直接练习训练流程。
+
+快速体验：
+
+```bash
+# 1. （可选）将采集到的姿态关键点转换成特征 CSV
+python ml/extract_pose_features.py --input my_raw_poses.json --output ml/data/my_dataset.csv
+
+# 2. 使用特征 CSV 训练并导出分类器（默认输出到 app/assets/）
+python ml/train_pose_classifier.py --input ml/data/my_dataset.csv --output android/JumpHeightRecorder/app/src/main/assets/workout_classifier.json
+
+# 3. 在 Android Studio 中点击 Sync Project with Gradle Files，重新构建即可加载新模型
+```
+
+导出的 JSON 会被 `WorkoutCounter` 在运行时加载；当文件缺失或解析失败时，应用会退回到内置的角度阈值逻辑继续计数。

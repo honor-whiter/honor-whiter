@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
@@ -53,8 +54,10 @@ class WorkoutCounterActivity : ComponentActivity() {
         binding = ActivityWorkoutCounterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val classifier = loadPoseClassifier()
+
         poseAnalyzer = WorkoutPoseAnalyzer(
-            counter = WorkoutCounter(),
+            counter = WorkoutCounter(classifier),
             mainExecutor = mainExecutor()
         ) { update ->
             viewModel.onWorkoutUpdate(update)
@@ -80,6 +83,16 @@ class WorkoutCounterActivity : ComponentActivity() {
     }
 
     private fun mainExecutor(): Executor = ContextCompat.getMainExecutor(this)
+
+    private fun loadPoseClassifier(): PoseClassifier? {
+        return try {
+            PoseClassifier.fromAsset(assets, CLASSIFIER_ASSET)
+        } catch (exception: Exception) {
+            Log.w(TAG, "Unable to load pose classifier", exception)
+            Toast.makeText(this, R.string.workout_classifier_missing, Toast.LENGTH_LONG).show()
+            null
+        }
+    }
 
     private fun observeViewModel() {
         viewModel.activeType.observe(this) { type ->
@@ -293,6 +306,9 @@ class WorkoutCounterActivity : ComponentActivity() {
     }
 
     companion object {
+        private const val TAG = "WorkoutCounterActivity"
+        private const val CLASSIFIER_ASSET = "workout_classifier.json"
+
         private val REQUIRED_PERMISSIONS = arrayOf(
             Manifest.permission.CAMERA,
             Manifest.permission.RECORD_AUDIO

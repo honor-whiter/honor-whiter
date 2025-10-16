@@ -76,10 +76,31 @@ android/JumpHeightRecorder/   # Android Studio 可直接导入的项目根目录
 - 运动计数链路：
   - [`WorkoutCounterActivity`](app/src/main/java/com/example/jumprecorder/WorkoutCounterActivity.kt)：绑定 CameraX 预览、视频录制与 `ImageAnalysis`，同时启动姿态识别与会话状态管理。
   - [`WorkoutPoseAnalyzer`](app/src/main/java/com/example/jumprecorder/WorkoutPoseAnalyzer.kt)：基于 ML Kit Accurate Pose Detector 解析人体关键点并回调 `WorkoutCounter`。
-  - [`WorkoutCounter`](app/src/main/java/com/example/jumprecorder/WorkoutCounter.kt)：实现动作分类与节奏状态机，根据关节角度/高度变化计算引体向上、俯卧撑、自重深蹲的完成次数。
-  - [`WorkoutSessionViewModel`](app/src/main/java/com/example/jumprecorder/WorkoutSessionViewModel.kt)：维护实时计数、当前动作类型、统计摘要以及分享状态，驱动界面展示。
+    - [`WorkoutCounter`](app/src/main/java/com/example/jumprecorder/WorkoutCounter.kt)：实现动作分类与节奏状态机，根据关节角度/高度变化计算引体向上、俯卧撑、自重深蹲的完成次数。
+    - [`PoseFeatureExtractor`](app/src/main/java/com/example/jumprecorder/PoseFeatureExtractor.kt)：统一封装关节角度与相对高度等特征计算，确保实时计数与离线训练脚本一致。
+    - [`PoseClassifier`](app/src/main/java/com/example/jumprecorder/PoseClassifier.kt)：加载 `app/src/main/assets/workout_classifier.json` 中的原型向量，为实时姿态输出类别概率，辅助 `WorkoutCounter` 判定动作类型。
+    - [`WorkoutSessionViewModel`](app/src/main/java/com/example/jumprecorder/WorkoutSessionViewModel.kt)：维护实时计数、当前动作类型、统计摘要以及分享状态，驱动界面展示。
 
-## 6. 下一步练习建议
+## 6. 自定义动作分类模型训练与替换
+
+运动计数模块默认加载 `app/src/main/assets/workout_classifier.json` 中的原型分类器。你可以通过仓库根目录的 `ml/` 脚本快速复现或替换：
+
+1. **采集或整理数据**：使用 ML Kit 姿态识别保存 `[{"label": "PUSH_UP", "landmarks": [...]}, …]` 结构的 JSON，或者直接复用 `ml/data/sample_pose_dataset.csv` 进行练习。
+2. **提取特征**：
+   ```bash
+   python ml/extract_pose_features.py --input raw_pose_samples.json --output ml/data/custom_dataset.csv
+   ```
+   若已手动整理好角度/高度特征，可跳过此步骤，直接使用 CSV 作为训练输入。
+3. **训练并导出分类器**：
+   ```bash
+   python ml/train_pose_classifier.py --input ml/data/custom_dataset.csv --output android/JumpHeightRecorder/app/src/main/assets/workout_classifier.json
+   ```
+   脚本会计算特征的均值、标准差与每个类别的中心向量，供 `PoseClassifier` 运行时加载。
+4. **同步项目**：在 Android Studio 中点击 *Sync Project with Gradle Files*，新的 JSON 会被打包进 APK。若模型文件缺失或解析失败，`WorkoutCounterActivity` 会弹出提示并自动回退至内置阈值逻辑。
+
+> ✅ 提示：如需保留多个模型版本，可在 `assets` 目录中使用不同文件名，并在 `WorkoutCounterActivity` 的 `CLASSIFIER_ASSET` 常量中切换。
+
+## 7. 下一步练习建议
 
 | 目标 | 建议任务 |
 | --- | --- |
@@ -89,7 +110,7 @@ android/JumpHeightRecorder/   # Android Studio 可直接导入的项目根目录
 | 扩展运动计数 | 训练或接入自定义动作分类模型，利用 `WorkoutCounter` 保持计数状态机，增补其他动作（例如波比跳、箭步蹲）。 |
 | 科学校准 | 编写标定流程：通过测量相机到地面的距离、镜头 FOV 等参数修正 `pixelPerCentimeter`。 |
 
-## 7. 常见问题 FAQ
+## 8. 常见问题 FAQ
 
 - **为什么估算结果不准确？** 当前算法仅用于教学展示。需要结合人体关键点检测或外部传感器才能得到可靠数据。
 - **如何导出视频文件？** 录制文件默认保存在应用的外部媒体目录（`/Android/media/com.example.jumprecorder/`），可通过文件管理器或 `adb pull` 导出。

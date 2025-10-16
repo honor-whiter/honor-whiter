@@ -39,4 +39,5 @@
     <string name="workout_share_title">运动计数结果</string>
     <string name="workout_share_message">训练汇总：%1$s</string>
     <string name="workout_recording_hint">录制中，请保持动作在取景范围内。</string>
+    <string name="workout_classifier_missing">未能加载动作识别模型，系统将仅使用基础角度阈值逻辑。</string>
 </resources>
