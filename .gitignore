@@ -7,3 +7,5 @@
 app/build/
 **/build/
 *.iml
+ml/raw_media/
+ml/extracted_frames/

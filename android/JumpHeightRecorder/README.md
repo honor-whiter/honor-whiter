@@ -85,7 +85,13 @@ android/JumpHeightRecorder/   # Android Studio 可直接导入的项目根目录
 
 运动计数模块默认加载 `app/src/main/assets/workout_classifier.json` 中的原型分类器。你可以通过仓库根目录的 `ml/` 脚本快速复现或替换：
 
-1. **采集或整理数据**：使用 ML Kit 姿态识别保存 `[{"label": "PUSH_UP", "landmarks": [...]}, …]` 结构的 JSON，或者直接复用 `ml/data/sample_pose_dataset.csv` 进行练习。
+1. **采集或整理数据**：
+   - 如果需要从视频/图像构建数据集，可编辑 `ml/data_sources/sample_workout_sources.json`（或自定义 manifest），然后运行：
+     ```bash
+     python ml/download_workout_media.py --manifest ml/data_sources/my_sources.json --video-dir ml/raw_media --extract-frames --frame-dir ml/extracted_frames
+     ```
+     该脚本支持 HTTP 直链与 YouTube 下载，并可按需裁剪片段、导出 JPEG 帧。务必确认素材拥有可用于训练的授权。
+   - 使用 ML Kit 姿态识别保存 `[{"label": "PUSH_UP", "landmarks": [...]}, …]` 结构的 JSON，或者直接复用 `ml/data/sample_pose_dataset.csv` 进行练习。
 2. **提取特征**：
    ```bash
    python ml/extract_pose_features.py --input raw_pose_samples.json --output ml/data/custom_dataset.csv
@@ -99,6 +105,8 @@ android/JumpHeightRecorder/   # Android Studio 可直接导入的项目根目录
 4. **同步项目**：在 Android Studio 中点击 *Sync Project with Gradle Files*，新的 JSON 会被打包进 APK。若模型文件缺失或解析失败，`WorkoutCounterActivity` 会弹出提示并自动回退至内置阈值逻辑。
 
 > ✅ 提示：如需保留多个模型版本，可在 `assets` 目录中使用不同文件名，并在 `WorkoutCounterActivity` 的 `CLASSIFIER_ASSET` 常量中切换。
+
+> ⚖️ **隐私&版权提示**：在采集包含人物的训练素材之前，请征得被摄者同意，并遵守素材平台的服务条款。对于来自公共数据集的资源，请遵循其许可证要求并在需要时添加署名。
 
 ## 7. 下一步练习建议
 

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "pushup_demo_1",
+    "label": "PUSH_UP",
+    "source": {
+      "type": "youtube",
+      "url": "https://www.youtube.com/watch?v=REPLACE_WITH_YOUR_VIDEO_ID",
+      "start": 30.0,
+      "end": 45.0
+    },
+    "notes": "示例：替换为你拥有下载权限的俯卧撑示例视频，可选用公开授权或自录素材。"
+  },
+  {
+    "id": "squat_demo_1",
+    "label": "BODYWEIGHT_SQUAT",
+    "source": {
+      "type": "direct",
+      "url": "https://example.com/path/to/squat_sample.mp4"
+    },
+    "notes": "示例：指向可合法下载的自重深蹲演示视频，若资源需要登录/授权，请先下载到本地再放入 raw_media 目录。"
+  }
+]

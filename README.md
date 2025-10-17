@@ -33,24 +33,31 @@
 
 更多关于功能、代码结构和进阶练习的说明，请继续查阅 [Android 项目内的学习指南](android/JumpHeightRecorder/README.md)。
 
-## 动作识别模型训练脚本
+## 动作识别数据采集与训练脚本
 
-仓库根目录新增了一个 `ml/` 文件夹，提供可本地运行的 Python 脚本，帮助你训练/替换运动计数模块所使用的姿态分类模型：
+仓库根目录新增了一个 `ml/` 文件夹，提供可本地运行的 Python 脚本，帮助你采集素材、整理姿态特征并训练/替换运动计数模块所使用的分类模型：
 
+- `ml/download_workout_media.py`：根据 manifest 批量下载你有权限使用的训练素材（支持 HTTP 直链与 YouTube，通过 `--extract-frames` 可直接导出 JPEG 帧）。
 - `ml/extract_pose_features.py`：将通过 ML Kit 采集到的关键点序列（JSON）转换为关节角度、相对高度等特征 CSV。
 - `ml/train_pose_classifier.py`：读取特征 CSV，计算每个动作类别的均值向量并导出到 `android/JumpHeightRecorder/app/src/main/assets/workout_classifier.json`。
 - `ml/data/sample_pose_dataset.csv`：提供 3 类基础动作（俯卧撑、自重深蹲、引体向上）的示例特征，可直接练习训练流程。
+- `ml/data_sources/sample_workout_sources.json`：示例 manifest，展示如何为不同动作列出下载源与裁剪时间段。请根据素材版权情况替换为你自己的配置。
 
 快速体验：
 
 ```bash
-# 1. （可选）将采集到的姿态关键点转换成特征 CSV
+# 1. （可选）根据 manifest 下载/整理训练素材（需要提前确认版权、隐私条款）
+python ml/download_workout_media.py --manifest ml/data_sources/my_sources.json --video-dir ml/raw_media --extract-frames --frame-dir ml/extracted_frames
+
+# 2. 将采集到的姿态关键点转换成特征 CSV
 python ml/extract_pose_features.py --input my_raw_poses.json --output ml/data/my_dataset.csv
 
-# 2. 使用特征 CSV 训练并导出分类器（默认输出到 app/assets/）
+# 3. 使用特征 CSV 训练并导出分类器（默认输出到 app/assets/）
 python ml/train_pose_classifier.py --input ml/data/my_dataset.csv --output android/JumpHeightRecorder/app/src/main/assets/workout_classifier.json
 
-# 3. 在 Android Studio 中点击 Sync Project with Gradle Files，重新构建即可加载新模型
+# 4. 在 Android Studio 中点击 Sync Project with Gradle Files，重新构建即可加载新模型
 ```
+
+> ⚖️ **合法合规提醒**：脚本不会绕过任何网站的版权或访问限制。请仅下载自己拍摄的素材，或遵循授权协议（例如 Creative Commons、开源数据集）获取公开数据，并在需要时对人物进行脱敏处理。
 
 导出的 JSON 会被 `WorkoutCounter` 在运行时加载；当文件缺失或解析失败时，应用会退回到内置的角度阈值逻辑继续计数。
