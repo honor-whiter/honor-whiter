@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Motion Analysis</string>
+    <string name="template_button">上传模板视频</string>
+    <string name="mimic_button">上传模仿者视频</string>
+    <string name="start_analysis">开始分析</string>
+    <string name="send_to_cloud">云端分析</string>
+    <string name="analysis_results">分析结果</string>
+    <string name="no_results">暂无分析结果</string>
+    <string name="local_processing_title">本地数据分析</string>
+    <string name="cloud_processing_title">云端数据分析</string>
+    <string name="loading">正在分析…</string>
+    <string name="metrics_header_metric">指标</string>
+    <string name="metrics_header_template">模板</string>
+    <string name="metrics_header_mimic">模仿者</string>
+    <string name="metrics_header_delta">差值</string>
+    <string name="overlay_video_title">关键点叠加视频</string>
+</resources>
